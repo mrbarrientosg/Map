@@ -95,12 +95,15 @@ static void enlarge(Map * map) {
     free(oldBucket);
 }
 
-static long linearProbing(Map * map, const void * key) {
+static long quadraticProbing(Map * map, const void * key) {
     assert(map->hash != NULL && map->equal != NULL);
     long long hash = llabs(map->hash(key));
     long idx = hash % map->size;
     while (map->buckets[idx] != NULL && map->equal(map->buckets[idx]->key , key) == 0) {
-        idx = (idx + 1) % map->size;
+        idx += 1;
+        idx *= idx;
+        idx %= map->size;
+        //idx = (idx + 1) % map->size;
     }
     return idx;
 }
@@ -147,7 +150,7 @@ int emptyMap(Map * map) {
 void insertMap(Map * map, const void * key, const void * value) {
     assert(map != NULL); // El mapa no puede ser NULL.
     
-    long idx = linearProbing(map, key);
+    long idx = quadraticProbing(map, key);
     
     if (map->buckets[idx] != NULL) {
         if (map->buckets[idx]->value == NULL) {
@@ -165,7 +168,7 @@ void insertMap(Map * map, const void * key, const void * value) {
 void * eraseKeyMap(Map * map, const void * key) {
     assert(map != NULL); // El mapa no puede ser NULL.
     
-    long idx = linearProbing(map, key);
+    long idx = quadraticProbing(map, key);
     
     if (map->buckets[idx] == NULL || map->buckets[idx]->value == NULL) return NULL;
     
@@ -179,7 +182,7 @@ void * eraseKeyMap(Map * map, const void * key) {
 void * searchMap(Map * map, const void * key) {
     assert(map != NULL); // El mapa no puede ser NULL.
 
-    long idx = linearProbing(map, key);
+    long idx = quadraticProbing(map, key);
         
     if (map->buckets[idx] == NULL || map->buckets[idx]->value == NULL) return NULL;
     
