@@ -158,10 +158,11 @@ void insertMap(Map * map, const void * key, const void * value) {
     } else {
         if (map->buckets[idx]->value == NULL) {
             map->buckets[idx]->value = value;
+            map->count += 1;
         }
     }
     
-    if ((map->count + 1) > map->loadFactor) enlarge(map); // si la cantidad supera al factor de carga se hace el enlarge del mapa.
+    if ((map->count) >= map->loadFactor) enlarge(map); // si la cantidad supera al factor de carga se hace el enlarge del mapa.
 }
 
 void * eraseKeyMap(Map * map, const void * key) {
@@ -173,7 +174,11 @@ void * eraseKeyMap(Map * map, const void * key) {
     
     void * aux = (void *)map->buckets[idx]->value;
     
-    map->buckets[idx]->value = NULL;
+    free(map->buckets[idx]);
+    
+    map->buckets[idx] = NULL;
+   
+    map->count -= 1;
     
     return aux;
 }
