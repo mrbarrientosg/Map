@@ -160,8 +160,6 @@ void insertMap(Map * map, const void * key, const void * value) {
             map->buckets[idx]->value = value;
         }
     }
-
-    map->count += 1;
     
     if ((map->count + 1) > map->loadFactor) enlarge(map); // si la cantidad supera al factor de carga se hace el enlarge del mapa.
 }
