@@ -152,12 +152,13 @@ void insertMap(Map * map, const void * key, const void * value) {
     
     long idx = quadraticProbing(map, key);
     
-    if (map->buckets[idx] != NULL) {
+    if (map->buckets[idx] == NULL) {
+        map->buckets[idx] = createPair(key, value);
+        map->count += 1;
+    } else {
         if (map->buckets[idx]->value == NULL) {
             map->buckets[idx]->value = value;
         }
-    } else {
-        map->buckets[idx] = createPair(key, value);
     }
 
     map->count += 1;
