@@ -99,10 +99,10 @@ static long quadraticProbing(Map * map, const void * key) {
     assert(map->hash != NULL && map->equal != NULL);
     long long hash = llabs(map->hash(key));
     long idx = hash % map->size;
+    long i = 0;
     while (map->buckets[idx] != NULL && map->equal(map->buckets[idx]->key , key) == 0) {
-        idx += 1;
-        idx *= idx;
-        idx %= map->size;
+        idx = (idx + i * i) % map->size;
+        i += 1;
         //idx = (idx + 1) % map->size;
     }
     return idx;
