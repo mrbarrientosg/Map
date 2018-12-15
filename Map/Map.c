@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <ctype.h>
 #include <assert.h>
 
 typedef struct pair Pair;
@@ -64,6 +65,30 @@ struct Map {
     MapEqualCallBack equal;
 };
 
+static long long djb2_hash(const void * key) {
+    long long hash = 5381;
+    
+    const char * ptr = key;
+    
+    while (*ptr) {
+        hash = ((hash << 5) + hash) + tolower(*ptr);
+        ptr++;
+    }
+    
+    return hash;
+}
+
+static int equal_string(const void * key1, const void * key2) {
+    const char * A = key1;
+    const char * B = key2;
+    
+    return strcmp(A, B) == 0;
+}
+
+const MapHashCallBack kStringMapHashCallBack = djb2_hash;
+
+const MapEqualCallBack kStringMapEqualCallBack = equal_string;
+
 static void enlarge(Map * map) {
     if (map->primeIndex == (primeLength - 1)) return; // se verifica si super el ultimo indice.
     
@@ -100,11 +125,13 @@ static long quadraticProbing(Map * map, const void * key) {
     long long hash = llabs(map->hash(key));
     long idx = hash % map->size;
     long i = 0;
+    
     while (map->buckets[idx] != NULL && map->equal(map->buckets[idx]->key , key) == 0) {
         idx = (idx + i * i) % map->size;
         i += 1;
-        //idx = (idx + 1) % map->size;
+//        idx = (idx + 1) % map->size;
     }
+    
     return idx;
 }
 
@@ -155,11 +182,8 @@ void insertMap(Map * map, const void * key, const void * value) {
     if (map->buckets[idx] == NULL) {
         map->buckets[idx] = createPair(key, value);
         map->count += 1;
-    } else {
-        if (map->buckets[idx]->value == NULL) {
-            map->buckets[idx]->value = value;
-            map->count += 1;
-        }
+    } else if (map->buckets[idx]->value == NULL) {
+        map->buckets[idx]->value = value;
     }
     
     if ((map->count) >= map->loadFactor) enlarge(map); // si la cantidad supera al factor de carga se hace el enlarge del mapa.
@@ -170,9 +194,11 @@ void * eraseKeyMap(Map * map, const void * key) {
     
     long idx = quadraticProbing(map, key);
     
-    if (map->buckets[idx] == NULL || map->buckets[idx]->value == NULL) return NULL;
+    if (map->buckets[idx] == NULL) return NULL;
     
-    void * aux = (void *)map->buckets[idx]->value;
+    void * aux = NULL;
+    
+    if (map->buckets[idx]->value != NULL) aux = (void *)map->buckets[idx]->value;
     
     free(map->buckets[idx]);
     
@@ -241,10 +267,11 @@ void removeAllMap(Map * map) {
     }
     
     free(map->buckets);
-    map->buckets = (Pair **)malloc(sizeof(Pair *)); // Se deja uno, por si se quiere volver a usar el mapa.
-    map->current = -1;
-    map->primeIndex = -1;
+    map->primeIndex = 0;
     map->count = 0;
-    map->size = 1;
-    map->loadFactor = 1;
+    map->current = 0;
+    map->loadFactor = (long) ceil(primes[0] * maxLoadFactor);
+    map->size = primes[0];
+    map->buckets = (Pair **)malloc(sizeof(Pair *) * primes[0]);
+    memset(map->buckets, 0, primes[0] * sizeof(Pair *)); 
 }

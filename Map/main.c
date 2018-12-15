@@ -28,33 +28,19 @@
 #include <ctype.h>
 #include "Map.h"
 
-long long stringHash(const void * key) {
-    long long hash = 5381;
-    
-    const char * ptr;
-    
-    for (ptr = key; *ptr != '\0'; ptr++) {
-        hash = ((hash << 5) + hash) + tolower(*ptr); /* hash * 33 + c */
-    }
-    
-    return hash;
-}
-
-int stringEqual(const void * key1, const void * key2) {
-    const char * A = key1;
-    const char * B = key2;
-    
-    return strcmp(A, B) == 0;
-}
 
 int main() {
     
-    Map * test = createMap(stringHash, stringEqual);
+    Map * test = createMap(kStringMapHashCallBack, kStringMapEqualCallBack);
     
-    insertMap(test, "Hola", "Hola");
+    insertMap(test, "Hola", NULL);
     insertMap(test, "Como", "Como");
     insertMap(test, "Test", "Test");
-    insertMap(test, "Si", "Si");
+    insertMap(test, "Si", NULL);
+    
+    insertMap(test, "Hola", "Hola");
+    
+    printf("Cantidad de datos: %ld\n", mapCount(test));
     
     char * data = firstMap(test);
     
@@ -70,6 +56,11 @@ int main() {
     insertMap(test, "Hola", "Hola");
     insertMap(test, "Como", "Como");
     insertMap(test, "Test", "Test");
+    
+    eraseKeyMap(test, "Test");
+    
+    printf("Cantidad de datos: %ld\n", mapCount(test));
+    
     insertMap(test, "Si", "Si");
     
     data = firstMap(test);

@@ -47,6 +47,20 @@ typedef long long (* MapHashCallBack)(const void * key);
 typedef int (* MapEqualCallBack)(const void * key1, const void * key2);
 
 /**
+ @constant kStringMapHashCallBack
+ 
+ Funcion hash predefinida para cadenas.
+ */
+extern const MapHashCallBack kStringMapHashCallBack;
+
+/**
+ @constant kStringMapEqualCallBack
+ 
+ Funcion equal predefinida para cadenas.
+ */
+extern const MapEqualCallBack kStringMapEqualCallBack;
+
+/**
  Crea un nuevo puntero de tipo Map.
 
  @param hash Funcion hash.
@@ -101,7 +115,7 @@ int emptyMap(Map * map);
 
  @param map Puntero al Map.
  @param key Llave del elemento a eliminar.
- @return Puntero al dato eliminado del Map.
+ @return Puntero al dato eliminado del Map, retorna NULL en caso que el valor no exisista.
  */
 void * eraseKeyMap(Map * map, const void * key);
 
