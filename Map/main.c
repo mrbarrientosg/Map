@@ -24,50 +24,49 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include "Map.h"
-
+#include "map.h"
 
 int main() {
     
-    Map * test = createMap(kStringMapHashCallBack, kStringMapEqualCallBack);
+    map *test = map_init (kStringMapHashCallBack, kStringMapEqualCallBack, NULL);
     
-    insertMap(test, "Hola", NULL);
-    insertMap(test, "Como", "Como");
-    insertMap(test, "Test", "Test");
-    insertMap(test, "Si", NULL);
+    map_insert (test, "Hola", NULL);
+    map_insert (test, "Como", "Como");
+    map_insert (test, "Test", "Test");
+    map_insert (test, "Si", NULL);
     
-    insertMap(test, "Hola", "Hola");
+    map_insert (test, "Hola", "Hola");
     
-    printf("Cantidad de datos: %ld\n", mapCount(test));
+    printf ("Cantidad de datos: %ld\n", map_size (test));
     
-    char * data = firstMap(test);
+    pair *data = map_first (test);
     
     while (data != NULL) {
-        printf("%s\n", data);
-        data = nextMap(test);
+        printf ("%s\n", (char *) data->value);
+        data = map_next (test);
     }
     
-    removeAllMap(test);
+    map_release (&test);
     
-    printf("\n");
+    test = map_init (kStringMapHashCallBack, kStringMapEqualCallBack, NULL);
     
-    insertMap(test, "Hola", "Hola");
-    insertMap(test, "Como", "Como");
-    insertMap(test, "Test", "Test");
+    printf ("\n");
     
-    eraseKeyMap(test, "Test");
+    map_insert (test, "Hola", "Hola");
+    map_insert (test, "Como", "Como");
+    map_insert (test, "Test", "Test");
     
-    printf("Cantidad de datos: %ld\n", mapCount(test));
+    map_remove_key (test, "Test");
     
-    insertMap(test, "Si", "Si");
+    printf ("Cantidad de datos: %ld\n", map_size (test));
     
-    data = firstMap(test);
+    map_insert (test, "Si", "Si");
+    
+    data = map_first (test);
     
     while (data != NULL) {
-        printf("%s\n", data);
-        data = nextMap(test);
+        printf ("%s\n", (char *) data->value);
+        data = map_next (test);
     }
     
     return 0;

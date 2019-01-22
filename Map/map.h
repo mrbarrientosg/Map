@@ -22,10 +22,25 @@
  SOFTWARE.
  */
 
-#ifndef Map_h
-#define Map_h
+#ifndef map_h
+#define map_h
 
-typedef struct Map Map;
+typedef struct map map;
+
+typedef struct pair pair;
+
+struct pair {
+    const void *key;
+    void *value;
+};
+
+/**
+ @typedef
+ Prototipo de funcion para eliminar de memoria el objeto que se guarda dentro del mapa.
+ 
+ @param object Puntero al objecto guardado.
+ */
+typedef void (*map_release_object_callback)(void *object);
 
 /**
  @typedef
@@ -34,31 +49,31 @@ typedef struct Map Map;
  @param key Llave para poder obtener el valor del hash.
  @return El valor hash de la llave.
  */
-typedef long long (* MapHashCallBack)(const void * key);
+typedef long long (*map_hash_callback)(const void *key);
 
 /**
  @typedef
  Prototipo de funcion Equal, la cual comparar dos llaves para saber si son iguales.
  
- @param key1 Primera llave.
- @param key2 Segunda llave.
+ @param key_1 Primera llave.
+ @param key_2 Segunda llave.
  @return Retorna 1 si las dos llaves son iguales; 0 lo contrario.
  */
-typedef int (* MapEqualCallBack)(const void * key1, const void * key2);
+typedef int (*map_equal_callback)(const void *key_1, const void *key_2);
 
 /**
  @constant kStringMapHashCallBack
  
  Funcion hash predefinida para cadenas.
  */
-extern const MapHashCallBack kStringMapHashCallBack;
+extern const map_hash_callback kStringMapHashCallBack;
 
 /**
  @constant kStringMapEqualCallBack
  
  Funcion equal predefinida para cadenas.
  */
-extern const MapEqualCallBack kStringMapEqualCallBack;
+extern const map_equal_callback kStringMapEqualCallBack;
 
 /**
  Crea un nuevo puntero de tipo Map.
@@ -67,7 +82,7 @@ extern const MapEqualCallBack kStringMapEqualCallBack;
  @param equal Funcion equal.
  @return Puntero al nuevo Map creado.
  */
-Map * createMap(MapHashCallBack hash, MapEqualCallBack equal);
+extern map *map_init (map_hash_callback hash, map_equal_callback equal, map_release_object_callback release);
 
 /**
  Inserta un nuevo elemento en el Map.
@@ -82,7 +97,7 @@ Map * createMap(MapHashCallBack hash, MapEqualCallBack equal);
  @param key Puntero a la llave del elemento que se va a insertar.
  @param value Puntero al valor que se va a insertar.
  */
-void insertMap(Map * map, const void * key, const void * value);
+extern void map_insert (map *map, const void *key, void *value);
 
 /**
  Retorna la cantidad de elementos no nulos del Map.
@@ -92,7 +107,7 @@ void insertMap(Map * map, const void * key, const void * value);
  @param map Puntero al Map.
  @return La cantidad de elemntos del Map.
  */
-long mapCount(Map * map);
+extern long map_size (map *map);
 
 /**
  Prueba si el Map está vacio.
@@ -102,10 +117,13 @@ long mapCount(Map * map);
  @param map Puntero al Map.
  @return 1 (true) si y solo si el Map no contiene elementos; 0 (false) lo contrario.
  */
-int emptyMap(Map * map);
+extern int map_empty (map *map);
 
 /**
  Elimina un elemento con la llave del Map, pero no lo libera de la memoria.
+ 
+ Si la funcion release esta activa, la funcion eliminara de la memoria
+ el dato guardado en la struct pair.
  
  Esta función tiene como complejidad:
  
@@ -117,7 +135,7 @@ int emptyMap(Map * map);
  @param key Llave del elemento a eliminar.
  @return Puntero al dato eliminado del Map, retorna NULL en caso que el valor no exisista.
  */
-void * eraseKeyMap(Map * map, const void * key);
+extern void *map_remove_key (map *map, const void *key);
 
 /**
  Busca un elemento en el Map con la llave.
@@ -132,7 +150,7 @@ void * eraseKeyMap(Map * map, const void * key);
  @param key Llave del elemento a buscar.
  @return Puntero al dato encontrado del Map.
  */
-void * searchMap(Map * map, const void * key);
+extern void *map_search_key (map *map, const void *key);
 
 /**
  Retorna el primero elemento no nulo del Map.
@@ -142,7 +160,7 @@ void * searchMap(Map * map, const void * key);
  @param map Puntero al Map.
  @return Puntero al primero elemento encontrado del Map.
  */
-void * firstMap(Map * map);
+extern pair *map_first (map *map);
 
 /**
  Retorna el siguiente elemento no nulo del Map.
@@ -152,7 +170,7 @@ void * firstMap(Map * map);
  @param map Puntero al Map.
  @return Puntero al siguiente elemento encontrado del Map.
  */
-void * nextMap(Map * map);
+extern pair *map_next (map *map);
 
 /**
  Elimina todos los elementos del Map, pero sin liberar la memoria de los datos contentidos.
@@ -161,7 +179,7 @@ void * nextMap(Map * map);
  
  @param map Puntero al Map.
  */
-void removeAllMap(Map * map);
+extern void map_release (map **map);
 
-#endif /* Map_h */
+#endif /* map_h */
 
